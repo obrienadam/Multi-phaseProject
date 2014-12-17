@@ -19,6 +19,10 @@ framexleftmargin=26pt}
 Course: Multi-phase Flows \endgraf
 Date: \today
 }
+
+\setlength{\parskip}{0.5\baselineskip}
+\setlength{\parindent}{0pt}
+
 \begin{document}
 
 \maketitle
@@ -60,7 +64,7 @@ is used, where $\rho_{g}$ is the air around the droplet based on $T_{ref}$ (intr
 
 \section{Evaporation Model}\label{sec:EvapModel}
 
-The evaporation model assumes that the droplet can be modelled from the well known "$D^{2}$-law", which has the form
+The evaporation model assumes that the droplet can be modelled from the well known "$D^{2}$-law", which has the form \cite{Sazhin2014}
 
 \begin{equation}\label{eq:DSquaredLaw}
 D^{2} = D_{0}^{2} - \lambda t
@@ -104,11 +108,11 @@ Once the surface vapour mass fraction ($Y_{l, s}$) is known, equation (\ref{eq:T
 \lambda' = \frac{8k_{g}\ln(1 + B_{M})}{c_{g}\rho_{l}}\left[1 + 0.3Re_{d}^{0.5}Pr_{g}^{0.33}\right]
 \end{equation}
 
-where the "prime" superscript denotes a quantity which has been modified to account for advection. Equation \ref{eq:DSquaredLaw} can then be used to update the droplet size at the current time step.
+where the "prime" superscript denotes a quantity which has been modified to account for advection. Equation (\ref{eq:DSquaredLaw}) can then be used to update the droplet size at the current time step.
 
 \section{Taylor Analogy Break-up (TAB) Model}\label{sec:TABModel}
 
-In addition to evaporation, the spray atomization model also includes a break-up model. The Taylor Analogy Break-up (TAB) model assumes the droplet can be represented by a simple spring-mass-dampter system, where the effects of surface tension are represented by the spring, the droplet mass distribution by the mass, and the effects of viscous dissipation by the damper. The model is shown graphically in figure \ref{fig:TabDroplet}.
+In addition to evaporation, the spray atomization model also includes a break-up model. The Taylor Analogy Break-up (TAB) model assumes the droplet can be represented by a simple spring-mass-dampter system, where the effects of surface tension are represented by the spring, the droplet mass distribution by the mass, and the effects of viscous dissipation by the damper \cite{Kabaliuk2014}. The model is shown graphically in figure \ref{fig:TabDroplet}.
 
 \begin{figure}[h] \label{fig:TabDroplet}
 \centering
@@ -158,7 +162,7 @@ y = \frac{4\Delta d_{min}}{d_{0}}
 
 where $d_{min}$ describes the deviation between the minor drop diameter and that of its original diameter, $d_{0}$.
 
-The solution to equation \ref{eq:TabPde} has the form:
+The solution to equation (\ref{eq:TabPde}) has the form:
 
 \begin{equation}\label{eq:TabPdeSolution}
 y(t) = We_{c} + e^{-t/\tau_{D}}\left\{(y_{0} + We_{c})\cos{(\omega t) + \frac{1}{\omega}\left(\frac{dy_{0}}{dt} + \frac{y_{0} - We_{c}}{\tau_{D}}\right)\sin{(\omega t)}}\right\}
@@ -229,6 +233,20 @@ where $C_{v}$ is a constant on the order of $1$.
 \section{Results}\label{sec:Results}
 
 The following section contains results obtained from coding the evaporation and TAB droplet advection code. The code itself as been included in the appendices.
+
+\section{Concluding Remarks}\label{sec:ConcludingRemarks}
+
+A code for modelling the atomization of sprays by combining the constant droplet temperature evaporation model, as well as a Taylor Analogy Break-up (TAB) model. The break-up model assumes that the droplet is a simple harmonic oscillator, with a single degree of freedom (a single mode). Improvements could be incorporated by coupling the droplet radius rate of change into the advection scheme, such that the force accounts for a varying reference area. Other improvements could be incorporated by also factoring in the droplet distortion into the advection scheme.
+
+\begin{thebibliography}{1}
+
+\bibitem{Kabaliuk2014} N. Kabaliuk, M.C. Jermy, E. Williams, T.L. Laber and M.C. Taylor, {\em Experimental validation of a numerical model for predicting the trajectory of blood drops in typical crime scene conditions, including droplet deformation and breakup, with a study of the effect of indoor air currents and wind on typical spatter drop trajectories.
+  Forensic Science Journal}  2014.
+
+\bibitem{Sazhin2014}  S.S. Sazhin, I.N. Shishkova and M. Al Qubeissi {\em Heating and evaporation of a two-component droplet: Hydrodynamic and kinetic models, International Journal of Heat and Mass Transfer}
+  , 2014
+
+\end{thebibliography}
 
 \newpage
 \appendix
@@ -887,6 +905,55 @@ def breakupTab(freestream, droplets, dt):
     # Return the number of droplets created
         
     return len(newDroplets)
+
+\end{lstlisting}
+
+\newpage
+\section{boTAB Code - Sample Input File}
+
+\begin{lstlisting}
+
+## This is the input file for boTAB
+
+# Empirical constants for the TAB model
+Cb = 0.5
+Ck = 8.
+Cd = 5.
+Cf = 1./3.
+K = 10./3.
+Cv = 1.
+
+# Freestream properties
+freestreamRho = 1.205
+freestreamMu = 18.27e-6
+freestreamTambient = 298.
+freestreamCp = 1.401
+freestreamK = 0.024
+freestreamVelocity = 40., 0.
+freestreamGravity = 0., 0.
+freestreamM = 28.97
+
+# Initial droplet properties
+dropletRadius = 5.e-4
+dropletRho = 998.
+dropletMu = 8.94e-4
+dropletSigma = 0.07262
+dropletTboil = 373.
+dropletL = 2257.
+dropletCp = 4.183
+dropletK = 0.58
+dropletPosition = 0., 0.
+dropletVelocity = 0., 20.
+dropletM = 18.01528
+
+# Inlet parameters
+inletDropletCreationFrequency = 10000
+inletWidth = 0.01
+inletVelocityDeviation = 0., 0.
+
+# Simulation parameters
+maxTime = 0.05
+nTimeSteps = 2000
 
 \end{lstlisting}
 
